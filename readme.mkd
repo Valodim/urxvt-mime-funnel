@@ -7,6 +7,7 @@ OSC code, intercepts the following base64 encoded data (which would otherwise
 be rendered as text), and displays it according to the given mimetype.
 
 Trying this manually would look something like this:
+
 	printf "\033]777;mime-funnel;image/png;\007" ; base64 image.png ; echo '!'
 
 So why is this useful? Because it allows displaying arbitrary, base64 encoded
@@ -28,8 +29,20 @@ this would look as follows:
 	URxvt.perl-ext: mime-funnel
 
 Or to just give it a whirl, run urxvt as such:
+
 	urxvt --perl-lib /path/to/repository -pe mime-funnel
 
 You can then use the supplied *funnel* script to display data in this way, or
 any other way using the interface described above.
 
+TODO
+----
+
+I'm using mktemp and base64 in the perl module for now. I was informed this
+could be done more elegantly using perl modules.
+
+Having this extension installed is also rather insecure at this point, since
+anything that can output text on your terminal will be able to display
+arbitrary media from your mailcap. I will probably add a security code resource
+which needs to be supplied as an argument to the mime-funnel OSC code, and an
+option to prompt the user before running the application.
