@@ -6,18 +6,18 @@
 use strict;
 use warnings;
 
-# printf "\033]777;mime-funnel;image/png;\007" ; base64 < image.png ; echo '!'
+# usage:
+# printf "\033]777;mime-funnel;image/png;\007" ; base64 image.png ; echo '!'
 
 my $funnel_type = 0;
 my $funnel_name = '';
 
 sub on_start {
-   my ($self) = @_;
+    my ($self) = @_;
 
-   $self->{"mime-launcher"} = $self->my_resource("mime-launcher") ||
-                            $self->x_resource("mime-launcher") ||
-                            "run-mailcap";
+    $self->{"mime-launcher"} = $self->x_resource("mime-launcher") || "run-mailcap";
 
+    ()
 }
 
 sub on_osc_seq_perl {
@@ -60,7 +60,7 @@ sub on_add_lines {
             print FUNNEL_FD substr ($line, 0, index($line, '!'));
             close FUNNEL_FD;
             # run run-mailcap with appropiate mimetype
-            system("$self->{\"mime-launcher\"} $funnel_type:$funnel_name; rm $funnel_name");
+            system($self->{"mime-launcher"} . " $funnel_type:$funnel_name; rm $funnel_name");
             $funnel_type = 0;
             return 1;
         } else {
