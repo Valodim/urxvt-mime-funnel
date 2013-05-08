@@ -11,10 +11,12 @@ use warnings;
 
 my $funnel_type = 0;
 my $funnel_name = '';
+my $funnel_timer = 0;
 
 sub on_start {
     my ($self) = @_;
 
+    $self->{"funnel-timeout"} = int($self->x_resource("funnel-timeout")) || 5;
     $self->{"mime-launcher"} = $self->x_resource("mime-launcher") || "run-mailcap";
 
     ()
@@ -45,6 +47,15 @@ sub on_osc_seq_perl {
     # status msg
     $self->scr_add_lines ("# receiving funneled data...\r\n");
 
+    $funnel_timer = urxvt::timer
+         ->new ->after($self->{"funnel-timeout"}) ->cb (sub {
+            if($funnel_type) {
+                $funnel_type = 0;
+                $self->scr_add_lines ("# funneling timeout!\r\n");
+                $self->want_refresh();
+            }
+         });
+
     1
 }
 
@@ -56,11 +67,13 @@ sub on_add_lines {
         $line =~ s/\r//g;
         # got bang?
         if(index($line, '!') != -1) {
+            $funnel_timer->stop();
             # print rest of data until the !
             print FUNNEL_FD substr ($line, 0, index($line, '!'));
             close FUNNEL_FD;
             # run run-mailcap with appropiate mimetype
             system($self->{"mime-launcher"} . " $funnel_type:$funnel_name; rm $funnel_name");
+            $funnel_timer = 0;
             $funnel_type = 0;
             return 1;
         } else {
