@@ -5,6 +5,7 @@
 
 use strict;
 use warnings;
+use File::Temp qw/ tempfile tempdir /;
 
 # usage:
 # printf "\033]777;mime-funnel;image/png;\007" ; base64 image.png ; echo '!'
@@ -39,7 +40,7 @@ sub on_osc_seq_perl {
     # save mimetype for later
     $funnel_type = $1;
     # get a temp file
-    $funnel_name = `mktemp`;
+    (my $fh, $funnel_name) = tempfile();
     $funnel_name =~ s/\n//;
     # open a pipe to base64, written to the temp file
     open(FUNNEL_FD, '| base64 -d >' . $funnel_name);
