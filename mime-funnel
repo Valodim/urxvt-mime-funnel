@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+# Author:  Vincent Breitmoser <valodim@mugenguild.com>
+# Website: https://github.com/Valodim/urxvt-mime-funnel
+# License: GPLv2
+
+use strict;
+use warnings;
+
+# printf "\033]777;mime-funnel;image/png;\007" ; base64 < image.png ; echo '!'
+
+my $funnel_type = 0;
+my $funnel_name = '';
+
+sub on_start {
+   my ($self) = @_;
+
+   $self->{"mime-launcher"} = $self->my_resource("mime-launcher") ||
+                            $self->x_resource("mime-launcher") ||
+                            "run-mailcap";
+
+}
+
+sub on_osc_seq_perl {
+    my ($self, $osc, $resp) = @_;
+
+    if ($funnel_type) {
+        $self->scr_add_lines ( "osc sequence within funneled data?! this should never happen!" );
+        return;
+    }
+
+    return unless $osc =~ s/^mime-funnel;//;
+
+    # parse argument(s)
+    $osc =~ s/^([^;]+)+;//
+        or return;
+
+    # save mimetype for later
+    $funnel_type = $1;
+    # get a temp file
+    $funnel_name = `mktemp`;
+    $funnel_name =~ s/\n//;
+    # open a pipe to base64, written to the temp file
+    open(FUNNEL_FD, '| base64 -d >' . $funnel_name);
+    binmode FUNNEL_FD;
+    # status msg
+    $self->scr_add_lines ("funneling as " . $funnel_type . "\r\n");
+
+    1
+}
+
+sub on_add_lines {
+    my ($self, $line) = @_;
+
+    if ($funnel_type) {
+        # base64 complains about \r, so strip it out
+        $line =~ s/\r//g;
+        # got bang?
+        if(index($line, '!') != -1) {
+            # print rest of data until the !
+            print FUNNEL_FD substr ($line, 0, index($line, '!'));
+            close FUNNEL_FD;
+            # run run-mailcap with appropiate mimetype
+            system("$self->{\"mime-launcher\"} $funnel_type:$funnel_name; rm $funnel_name");
+            $funnel_type = 0;
+            return 1;
+        } else {
+            # just passin' through
+            print FUNNEL_FD $line;
+            return 1;
+        }
+
+    }
+
+    ()
+}
+
+
+# vim: set et ts=4 sw=4:
+
