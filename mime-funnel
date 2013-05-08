@@ -43,7 +43,7 @@ sub on_osc_seq_perl {
     open(FUNNEL_FD, '| base64 -d >' . $funnel_name);
     binmode FUNNEL_FD;
     # status msg
-    $self->scr_add_lines ("funneling as " . $funnel_type . "\r\n");
+    $self->scr_add_lines ("# receiving funneled data...\r\n");
 
     1
 }

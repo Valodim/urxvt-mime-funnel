@@ -1,0 +1,27 @@
+#!/bin/zsh
+
+(( $# > 0  )) || { echo "Usage: [-f] $0 file [mimetype]" >&2 ; exit 1 }
+
+integer force=0
+[[ $1 == "-f" ]] && { shift ; force=1 }
+
+[[ -f $1 ]] || { echo "Error: file not found: $1" >&2 ; exit 2 }
+
+local mime
+if [[ -n $2 ]]; then
+    mime=$2
+else
+    mime=$(mimetype -b $1)
+    (( $? == 0 && $#mime > 0 )) || { echo "Error: no known mimetype for $1" >&2 ; exit 3 }
+fi
+
+zmodload zsh/stat
+if (( force == 0 && $(zstat +size $1) > 1000000 )); then
+    [[ -f $1 ]] || { echo "Error: Filesize bigger than 1M! Use -f to force." >&2 ; exit 4 }
+fi
+
+echo "Funneling as $mime"
+
+printf "\033]777;mime-funnel;$mime;\007"
+base64 < "$1"
+echo '!'
