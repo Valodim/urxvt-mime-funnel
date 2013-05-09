@@ -33,16 +33,31 @@ Or to just give it a whirl, run urxvt as such:
 	urxvt --perl-lib /path/to/repository -pe mime-funnel
 
 You can then use the supplied *funnel* script to display data in this way, or
-any other way using the interface described above.
+any other way using the interface described above. *funnel* will try to find
+the mimetype of a provided file using *mimetype* (packaged with
+libfile-mimeinfo-perl in debian)
+
+	funnel image.png
+
+Security
+--------
+
+Running arbitrary mailcap applications simply on specific text output is
+obviously a big security risk. This output could come from anywhere, say the
+contents of a mail file or even a wall message. To mitigate this a bit, you
+can set a security code in your Xresources, like this:
+
+	URxvt.funnel-code: mysupersecretcode
+
+If such code is specified, only funnelled data with this code as additional
+argument will be accepted, as such:
+
+	printf "\033]777;mime-funnel;image/png;mysupersecretcode;\007" ; base64 image.png ; echo '!'
+
+Just change the line at the beginning of *funnel* to use your code with it.
 
 TODO
 ----
 
-I'm using mktemp and base64 in the perl module for now. I was informed this
-could be done more elegantly using perl modules.
-
-Having this extension installed is also rather insecure at this point, since
-anything that can output text on your terminal will be able to display
-arbitrary media from your mailcap. I will probably add a security code resource
-which needs to be supplied as an argument to the mime-funnel OSC code, and an
-option to prompt the user before running the application.
+Configurably prompt the user whether to reject funnelled media or not if no
+security code is given.

@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+# change this to the secret the one you configured in your Xresources!
+local code='secret'
+
 (( $# > 0  )) || { echo "Usage: $0 [-f] file [mimetype]" >&2 ; exit 1 }
 
 integer force=0
@@ -11,7 +14,7 @@ if [[ $1 == "-" ]]; then
     mime=$2
 
     echo "Funneling as $mime"
-    printf "\033]777;mime-funnel;$mime;\007"
+    printf "\033]777;mime-funnel;$mime;$code;\007"
     base64
     echo '!'
 
@@ -33,7 +36,7 @@ else
     fi
 
     echo "Funneling as $mime"
-    printf "\033]777;mime-funnel;$mime;\007"
+    printf "\033]777;mime-funnel;$mime;$code;\007"
     base64 < $1
     echo '!'
 

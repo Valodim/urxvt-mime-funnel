@@ -17,6 +17,7 @@ my $funnel_timer = 0;
 sub on_start {
     my ($self) = @_;
 
+    $self->{"funnel-code"} = $self->x_resource("funnel-code") || 0;
     $self->{"funnel-timeout"} = int($self->x_resource("funnel-timeout")) || 5;
     $self->{"mime-launcher"} = $self->x_resource("mime-launcher") || "run-mailcap";
 
@@ -33,12 +34,23 @@ sub on_osc_seq_perl {
 
     return unless $osc =~ s/^mime-funnel;//;
 
-    # parse argument(s)
-    $osc =~ s/^([^;]+)+;//
+    # parse mimetype argument
+    $osc =~ s/^([^;]+);//
         or return;
-
     # save mimetype for later
     $funnel_type = $1;
+
+    # make sure they are even allowed to do this!
+    if ($self->{"funnel-code"}) {
+        $osc =~ s/^([^;]+);//;
+        if($self->{"funnel-code"} ne $1) {
+            # make sure funneling mode is not active!!
+            $funnel_type = 0;
+            $self->scr_add_lines ("# incorrect security code, funneled data rejected!\r\n");
+            return 1;
+        }
+    }
+
     # get a temp file
     (my $fh, $funnel_name) = tempfile();
     $funnel_name =~ s/\n//;
