@@ -8,7 +8,7 @@ use warnings;
 use File::Temp qw/ tempfile tempdir /;
 
 # usage:
-# printf "\033]777;mime-funnel;image/png;\007" ; base64 image.png ; echo '!'
+# printf "\033]777;mime-funnel;image/png;securitycode;\007" ; base64 image.png ; echo '!'
 
 my $funnel_type = 0;
 my $funnel_name = '';

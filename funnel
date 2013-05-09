@@ -26,6 +26,7 @@ else
     if [[ -n $2 ]]; then
         mime=$2
     else
+        (( $+commands[mimetype] )) || { echo "Error: can't automatically determine mimetype.\nSpecify it, or install libfile-mimeinfo-perl" >&2 ; exit 3 }
         mime=$(mimetype -b $1)
         (( $? == 0 && $#mime > 0 )) || { echo "Error: no known mimetype for $1" >&2 ; exit 3 }
     fi

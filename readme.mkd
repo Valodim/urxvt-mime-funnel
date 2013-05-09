@@ -32,12 +32,19 @@ Or to just give it a whirl, run urxvt as such:
 
 	urxvt --perl-lib /path/to/repository -pe mime-funnel
 
-You can then use the supplied *funnel* script to display data in this way, or
-any other way using the interface described above. *funnel* will try to find
-the mimetype of a provided file using *mimetype* (packaged with
-libfile-mimeinfo-perl in debian)
+Usage
+-----
+
+You can then use the supplied *funnel* script to display media, or any other
+way using the interface described above.
 
 	funnel image.png
+
+*funnel* will try to find the mimetype of a provided file using *mimetype*
+(packaged with libfile-mimeinfo-perl in debian) if available, but it can also
+be specified explicitly as a second argument. As a sanity check, files bigger
+than 1M will be rejected unless the -f option is given. Using - as filename
+will read data from stdin, this does however require an explicit mimetype.
 
 Security
 --------
