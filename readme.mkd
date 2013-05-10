@@ -14,9 +14,9 @@ So why is this useful? Because it allows displaying arbitrary, base64 encoded
 media from a console stream, in particular over ssh with no server-side
 dependencies whatsoever.
 
-The script uses base64 for decoding, and run-mailcap (packaged in debian with
-mime-support) to run an appropiate application for the mimetype. See man 5
-mailcap.
+The script has a dependency on base64 for decoding, and on run-mailcap (packaged
+in debian with mime-support) to run an appropiate application for the mimetype
+(man 5 mailcap), unless configured otherwise, see below.
 
 Installation
 ------------
@@ -31,6 +31,13 @@ this would look as follows:
 Or to just give it a whirl, run urxvt as such:
 
 	urxvt --perl-lib /path/to/repository -pe mime-funnel
+
+You can also configure the command to be called by specifying the mime-launcher
+resource as an [sprintf](http://perldoc.perl.org/functions/sprintf.html) string.
+The first argument is the mimetype, the second is the temp filename. This
+defaults to:
+
+	URxvt.mime-launcher: run-mailcap '%s:%s'; rm '%2$s';
 
 Usage
 -----

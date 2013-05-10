@@ -19,7 +19,8 @@ sub on_start {
 
     $self->{"funnel-code"} = $self->x_resource("funnel-code") || 0;
     $self->{"funnel-timeout"} = int($self->x_resource("funnel-timeout")) || 5;
-    $self->{"mime-launcher"} = $self->x_resource("mime-launcher") || "run-mailcap";
+    # important stuff! also, security relevant!
+    $self->{"mime-launcher"} = $self->x_resource("mime-launcher") || 'run-mailcap \'%s:%s\'; rm \'%2$s\'';
 
     ()
 }
@@ -89,7 +90,7 @@ sub on_add_lines {
             # child process
             if(!$pid) {
                 # exec the mime launcher
-                exec($self->{"mime-launcher"} . " $funnel_type:$funnel_name; rm $funnel_name")
+                exec(sprintf($self->{"mime-launcher"}, $funnel_type, $funnel_name))
                     or die "couldn't exec!";
             }
             $funnel_timer = 0;
