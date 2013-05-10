@@ -85,7 +85,13 @@ sub on_add_lines {
             print FUNNEL_FD substr ($line, 0, index($line, '!'));
             close FUNNEL_FD;
             # run run-mailcap with appropiate mimetype
-            system($self->{"mime-launcher"} . " $funnel_type:$funnel_name; rm $funnel_name");
+            my $pid = fork();
+            # child process
+            if(!$pid) {
+                # exec the mime launcher
+                exec($self->{"mime-launcher"} . " $funnel_type:$funnel_name; rm $funnel_name")
+                    or die "couldn't exec!";
+            }
             $funnel_timer = 0;
             $funnel_type = 0;
             return 1;
